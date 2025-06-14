@@ -1,69 +1,85 @@
 import tkinter as tk
 import pydirectinput
 import pytesseract
-from PIL import ImageGrab
 import time
 import keyboard
 import cv2
 import numpy as np
 from PIL import Image
+from concurrent.futures import ThreadPoolExecutor
+import mss
+import threading
+
+executor = ThreadPoolExecutor(max_workers=4)
 
 wisp_keys = {"Z", "X", "C", "V"}
     
 letters = {"Z.png", "X.png", "C.png", "V.png"}
-letter_threshold = .8
+letter_threshold = .7
+
+templates = {}
+for name in letters:
+    img = cv2.imread(name, cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    templates[name.split(".png")[0]] = gray
 
 def match_letter(source):
     source_g = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY)
-    
-    for letter in letters:
-        template = cv2.imread(letter, cv2.IMREAD_COLOR)
-        template_g = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
-        w, h = template_g.shape[::-1]
 
+    for name, template_g in templates.items():
+        w, h = template_g.shape[::-1]
         result = cv2.matchTemplate(source_g, template_g, cv2.TM_CCOEFF_NORMED)
         loc = np.where(result >= letter_threshold)
-
         if len(loc[0]) > 0:
-            return letter.split(".png")[0]
+            return name
 
+buffer = {}
+buffer_lock = threading.Lock()
+
+def read(piece, i):
+    letter_match = match_letter(piece)
+    with buffer_lock:
+            buffer[i-1] = letter_match.lower() if letter_match else "N/A"
+
+def grab_screen(bbox):
+    with mss.mss() as sct:
+        monitor = {"top": bbox[1], "left": bbox[0], "width": bbox[2]-bbox[0], "height": bbox[3]-bbox[1]}
+        img = np.array(sct.grab(monitor))
+        return cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
 def scan_screen(bbox):
     #chop image into 5
-    img = ImageGrab.grab(bbox)
-    img.save("Screen_Grab.png")
 
-    cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-
-    height, width, channels = cv_img.shape
+    cv_img = grab_screen(bbox)
+    _, width, _ = cv_img.shape
     piece_width = width // 5  # integer division to get width per piece
 
-    pieces = []
+    buffer.clear()
+    futures = []
+
     for i in range(5):
         start_x = i * piece_width
         # Make sure last piece takes the remaining pixels (in case width not divisible by 5)
         end_x = (i + 1) * piece_width if i < 4 else width
         piece = cv_img[:, start_x:end_x]
-        pieces.append(piece)
-
-    # Now pieces[0], pieces[1], ..., pieces[4] contain the 5 image slices
-
-    # Example: Show each piece in a window (press any key to close each)
-    for i, piece in enumerate(pieces):
-        if i == 0: 
-            continue
-        filename = f"piece_{i+1}.png"
-        cv2.imwrite(filename, piece)
-        
-        letter_match = match_letter(piece)
-        if letter_match:
-            print(letter_match)
-            pydirectinput.press(letter_match.lower())
-            time.sleep(.01)
+        futures.append(executor.submit(read, piece, i))
 
 
-def type_shit(shit_to_type):
-    print("Typing shit")
+    for future in futures:
+        future.result() #waits for threads to complete
+
+    if all(buffer.get(i, "N/A") == "N/A" for i in range(4)):
+        return  # nothing to type
+    type_shit()
+
+def type_shit():
+    for i in range(4):
+        letter = buffer[i]
+        if letter == "N/A":
+            break #should work because we're going in order
+
+        pydirectinput.press(letter)
+    buffer.clear()
 
 
 #setup start/stop hotkey
@@ -104,6 +120,7 @@ bound_box = (top_left[0], top_left[1], bottom_right[0], bottom_right[1]) #ok coo
 print(bound_box)
 
 while True:
+    time.sleep(.1)
     if state["running"] == True:
         scan_screen(bound_box)
 
