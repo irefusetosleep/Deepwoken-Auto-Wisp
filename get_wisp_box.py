@@ -15,7 +15,7 @@ template = cv2.imread("Wisp_Box_Lines.png")
 template_grey = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
 template_w, template_h = template_grey.shape[::-1]
 
-threshold = 0.6
+threshold = 0.6 #mess with this if its failing to find the ritual cast box
 
 def get_roblox_monitor(): #Returns the display roblox is open on
     while True: 
@@ -36,7 +36,7 @@ def get_roblox_monitor(): #Returns the display roblox is open on
             else:
                 print("Couldnt get monitor")
         else:
-            print("Open roblox in fullscreen nigga")
+            print("Open roblox in fullscreen buddy")
             time.sleep(.5)
 
 
