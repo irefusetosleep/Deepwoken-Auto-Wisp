@@ -1,3 +1,11 @@
+
+TOGGLE_KEY = 'f5' #this keybind toggles if the macro is active or not, use this if it seems to make you lag a bottom_right
+DELAY = 0 #if you're high ping ritual casts will be delayed, tweak this to work with your ping
+
+letter_threshold = .7 #tweak this if the macro has trouble reading keys (lower = less strict, higher = stricter)
+
+#dont edit anything below here these are the only settings
+
 import tkinter as tk
 import pydirectinput
 import pytesseract
@@ -12,10 +20,7 @@ import threading
 
 executor = ThreadPoolExecutor(max_workers=4)
 
-wisp_keys = {"Z", "X", "C", "V"}
-    
 letters = {"Z.png", "X.png", "C.png", "V.png"}
-letter_threshold = .7
 
 templates = {}
 for name in letters:
@@ -79,12 +84,11 @@ def type_shit():
             break #should work because we're going in order
 
         pydirectinput.press(letter)
+        time.sleep(DELAY)
     buffer.clear()
 
 
 #setup start/stop hotkey
-TOGGLE_KEY = 'f5'
-
 state = {"running":False}
 
 def on_toggle():
@@ -94,9 +98,6 @@ def on_toggle():
 keyboard.add_hotkey(TOGGLE_KEY, on_toggle)
 
 #main loop
-
-LOOP_TIME = .2 #how long the machine waits between screen scans
-KEYPRESS_SPEED = LOOP_TIME / 1.5 #computer scans every .2 seconds, presses the keys this much faster
 
 top_left = (0,0)
 bottom_right = (0,0)
@@ -113,11 +114,7 @@ with open('box_location.txt', 'r') as file:
         elif key == "BottomRight":
             bottom_right = (x, y)
 
-print("TopLeft:", top_left)
-print("BottomRight:", bottom_right)           
-
 bound_box = (top_left[0], top_left[1], bottom_right[0], bottom_right[1]) #ok cool we know where to look
-print(bound_box)
 
 while True:
     time.sleep(.1)
