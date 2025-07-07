@@ -1,3 +1,5 @@
+threshold = 0.6 #mess with this if its failing to find the ritual cast box
+
 #run this script if either:
 # This is the first time you're using this program
 # You get a new monitor/s
@@ -14,8 +16,6 @@ import time
 template = cv2.imread("Wisp_Box_Lines.png")
 template_grey = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
 template_w, template_h = template_grey.shape[::-1]
-
-threshold = 0.6 #mess with this if its failing to find the ritual cast box
 
 def get_roblox_monitor(): #Returns the display roblox is open on
     while True: 

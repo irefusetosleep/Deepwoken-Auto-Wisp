@@ -1,3 +1,5 @@
+#you can ignore this i needed it to flatten the wisp image
+
 from PIL import Image
 
 img = Image.open("Wisp_Box.png").convert("RGBA")

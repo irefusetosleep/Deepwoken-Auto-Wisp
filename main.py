@@ -1,5 +1,3 @@
-
-TOGGLE_KEY = 'f5' #this keybind toggles if the macro is active or not, use this if it seems to make you lag a bottom_right
 DELAY = 0 #if you're high ping ritual casts will be delayed, tweak this to work with your ping
 
 letter_threshold = .7 #tweak this if the macro has trouble reading keys (lower = less strict, higher = stricter)
@@ -89,16 +87,9 @@ def type_shit():
 
 
 #setup start/stop hotkey
-state = {"running":False}
-
-def on_toggle():
-    state["running"] = not state["running"] #fuck off python
-    print("Running:", state["running"])
-
-keyboard.add_hotkey(TOGGLE_KEY, on_toggle)
+state = {"running":True}
 
 #main loop
-
 top_left = (0,0)
 bottom_right = (0,0)
 
@@ -120,5 +111,3 @@ while True:
     time.sleep(.1)
     if state["running"] == True:
         scan_screen(bound_box)
-
-keyboard.wait() #keeps the program alive
