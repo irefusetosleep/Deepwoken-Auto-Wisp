@@ -1,4 +1,4 @@
-threshold = 0.6 #mess with this if its failing to find the ritual cast box
+threshold = 0.55 #mess with this if its failing to find the ritual cast box
 
 #run this script if either:
 # This is the first time you're using this program
@@ -20,8 +20,6 @@ template_w, template_h = template_grey.shape[::-1]
 def get_roblox_monitor(): #Returns the display roblox is open on
     while True: 
         for w in gw.getWindowsWithTitle("Roblox"):
-            if w.isMaximized == False:
-                w.maximize()
             center_y = w.left + w.width // 2
             center_x = w.top + w.height // 2
 
@@ -81,9 +79,15 @@ def get_wisp_box():
                 # Save or display for debug
                 cv2.imwrite("matched_region.png", region)
                 
+                keyboard.wait()
+
                 exit()
             else:
                 print("Image not found.")
+
+for i in reversed(range(3)):
+    print("Scanning screen in",i+1)
+    time.sleep(1)
 
 get_wisp_box()
 
