@@ -1,4 +1,4 @@
-To use this macro first you need: Python (https://www.python.org/downloads/) and OCR (https://github.com/tesseract-ocr/tesseract) installed on your system
+To use this macro first you need: [Python](https://www.python.org/downloads/) and [OCR](https://github.com/tesseract-ocr/tesseract/releases/download/5.5.0/tesseract-ocr-w64-setup-5.5.0.20241111.exe) installed on your system
 
 #1. Run "get_wisp_box.py" with your ritual cast open, this allows the machine to know where to look when autocasting
 #2. Run "main.pyw", this will open a background process. 
