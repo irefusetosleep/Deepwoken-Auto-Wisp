@@ -16,9 +16,13 @@ from concurrent.futures import ThreadPoolExecutor
 import mss
 import threading
 
+pydirectinput.PAUSE = 0.05
+
 executor = ThreadPoolExecutor(max_workers=4)
 
 letters = {"Z.png", "X.png", "C.png", "V.png"}
+
+#creates templates for tesseract to use
 
 templates = {}
 for name in letters:
@@ -27,10 +31,9 @@ for name in letters:
     templates[name.split(".png")[0]] = gray
 
 def match_letter(source):
-    source_g = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY)
+    source_g = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY) # convert to greyscale for easier reading
 
     for name, template_g in templates.items():
-        w, h = template_g.shape[::-1]
         result = cv2.matchTemplate(source_g, template_g, cv2.TM_CCOEFF_NORMED)
         loc = np.where(result >= letter_threshold)
         if len(loc[0]) > 0:
